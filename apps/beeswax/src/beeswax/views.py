@@ -188,11 +188,7 @@ def clone_design(request, design_id):
   copy = design.clone(request.user)
   copy.save()
 
-  copy_doc = Document.objects.link(copy,
-      owner=copy.owner,
-      name=copy.name,
-      description=copy.desc,
-      extra=copy.type)
+  design.doc.get().copy(content_object=copy)
 
   messages.info(request, _('Copied design: %(name)s') % {'name': design.name})
 
@@ -646,6 +642,15 @@ def query_done_cb(request, server_id):
 """
 Utils
 """
+def massage_columns_for_json(cols):
+  massaged_cols = []
+  for column in cols:
+    massaged_cols.append({
+      'name': column.name,
+      'type': column.type,
+      'comment': column.comment
+    })
+  return massaged_cols
 
 def authorized_get_design(request, design_id, owner_only=False, must_exist=False):
   if design_id is None and not must_exist:
