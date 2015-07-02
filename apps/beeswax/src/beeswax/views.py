@@ -642,15 +642,6 @@ def query_done_cb(request, server_id):
 """
 Utils
 """
-def massage_columns_for_json(cols):
-  massaged_cols = []
-  for column in cols:
-    massaged_cols.append({
-      'name': column.name,
-      'type': column.type,
-      'comment': column.comment
-    })
-  return massaged_cols
 
 def authorized_get_design(request, design_id, owner_only=False, must_exist=False):
   if design_id is None and not must_exist:
