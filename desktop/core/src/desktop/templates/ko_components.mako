@@ -159,8 +159,9 @@ from django.utils.translation import ugettext as _
           };
           self.assist.getData(null, force);
 
-          self.assist.selectedMainObject.subscribe(function() {
+          self.assist.selectedMainObject.subscribe(function(value) {
             self.loadAssistFirstLevel();
+            huePubSub.publish('assist.mainObjectChange', value);
           });
         };
 

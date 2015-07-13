@@ -130,22 +130,6 @@ ${ commonheader(_('Query'), app_name, user, "68px") | n,unicode }
 % endif
 </style>
 
-<style type="text/css" media="screen">
-  .editor {
-    height: 200px;
-    margin: 20px;
-  }
-  .filechooser {
-    position: absolute;
-    display: none;
-    z-index: 20000;
-    background-color: #FFFFFF;
-    padding: 10px;
-    min-width: 350px;
-  }
-</style>
-
-
 <div class="search-bar">
   <div class="pull-right" style="padding-right:50px">
 
@@ -481,7 +465,7 @@ ${ commonheader(_('Query'), app_name, user, "68px") | n,unicode }
         </div>
       </div>
 ##      <textarea data-bind="value: statement_raw, codemirror: { 'id': id(), 'viewportMargin': Infinity, 'lineNumbers': true, 'indentUnit': 0, 'matchBrackets': true, 'mode': editorMode(), 'enter': execute }"></textarea>
-        <div class="editor" data-bind="attr: {id: id()}, aceEditor: {value: statement_raw, aceInstance: ace, mode: aceEditorMode, onChange: onChangeHandler, onAfterExec: onAfterExecHandler, extraCompleters: completers, errors: errors }"></div>
+        <div class="ace-editor" data-bind="attr: {id: id()}, aceEditor: {value: statement_raw, aceInstance: ace, mode: aceEditorMode, extraCompleters: completers, errors: errors, autocompleter: aceAutocomplete }"></div>
       </div>
   </div>
 
@@ -788,6 +772,17 @@ ${ commonheader(_('Query'), app_name, user, "68px") | n,unicode }
 </div>
 
 
+
+<div class="ace-filechooser">
+  <a class="pointer pull-right" data-bind="click: function(){ $('.filechooser').hide(); }"><i class="fa fa-times"></i></a>
+  <div class="ace-filechooser-content">
+    <!--[if !IE]><!--><i class="fa fa-spinner fa-spin" style="font-size: 30px; color: #DDD"></i><!--<![endif]-->
+    <!--[if IE]><img src="${ static('desktop/art/spinner.gif') }"/><![endif]-->
+  </div>
+</div>
+
+
+
 <div id="sessionsDemiModal" class="demi-modal fade" data-backdrop="false">
   <a href="javascript: void(0)" data-dismiss="modal" class="pull-right" style="margin: 10px"><i class="fa fa-times"></i></a>
   <div class="modal-body">
@@ -862,157 +857,14 @@ ${ koComponents.assistPanel() }
 <script type="text/javascript" charset="utf-8">
 
 
-var AceAutocomplete = new Autocomplete({
-   autocompleteBaseURL: "/beeswax/api/autocomplete/",
-   autocompleteApp: "beeswax",
-   autocompleteUser: "hue",
-   autocompleteFailsQuietlyOn: [500] // error codes from beeswax/views.py - autocomplete
+  var aceAutocomplete = new Autocomplete({
+    autocompleteBaseURL: "${ autocomplete_base_url | n,unicode }",
+    autocompleteApp: "beeswax",
+    autocompleteUser: "${user}",
+    autocompleteFailsQuietlyOn: [500] // error codes from beeswax/views.py - autocomplete
   });
 
   var DEFAULT_DB = "default";
-
-  function newCompleter(items) {
-    return {
-      getCompletions: function(editor, session, pos, prefix, callback) {
-        callback(null, items);
-      }
-    }
-  }
-
-  function fieldsAutocomplete(editor, valueAccessor) {
-    try {
-      var _before = editor.getTextBeforeCursor(";");
-      var _after = editor.getTextAfterCursor(";");
-      var _statement = _before + _after;
-      var _foundTable = "";
-      if (_before.substr(-1) == "."){ // gets the table alias
-        _foundTable = _before.split(" ").pop().slice(0, -1);
-      }
-      else { // gets the standard table
-        var _from = _statement.toUpperCase().indexOf("FROM");
-        if (_from > -1) {
-          var _match = _statement.toUpperCase().substring(_from).match(/ ON| LIMIT| WHERE| GROUP| SORT| ORDER BY|;/);
-          var _to = _statement.length;
-          if (_match) {
-            _to = _match.index;
-          }
-          var _found = _statement.substr(_from, _to).replace(/(\r\n|\n|\r)/gm, "").replace(/from/gi, "").replace(/join/gi, ",").split(",");
-        }
-
-        for (var i = 0; i < _found.length; i++) {
-          if ($.trim(_found[i]) != "" && _foundTable == "") {
-            _foundTable = $.trim(_found[i]).split(" ")[0];
-          }
-        }
-      }
-
-      if (_foundTable != "") {
-          editor.showSpinner();
-          // fill up with fields
-          AceAutocomplete.getTableColumns(DEFAULT_DB, _foundTable, _statement, function(data){
-            var _fieldNames = data.split(" ");
-            var _fields = [];
-            _fieldNames.forEach(function(fld){
-              _fields.push({value: fld, score: (fld == "*") ? 1001: 1000, meta: "column"});
-            });
-            valueAccessor().extraCompleters([newCompleter(_fields)]);
-            editor.hideSpinner();
-          });
-      }
-    }
-    catch (e) {
-    }
-  }
-
-  function onAfterExecHandler(e, editor, valueAccessor) {
-    editor.session.getMode().$id = valueAccessor().mode(); // forces the id again because of Ace command internals
-    if ((editor.session.getMode().$id == "ace/mode/hivesql" || editor.session.getMode().$id == "ace/mode/impalasql") && e.args == "."){
-      fieldsAutocomplete(editor, valueAccessor);
-    }
-        // if it's pig and before it's LOAD ' we disable the autocomplete and show a filechooser btn
-    if (editor.session.getMode().$id = "ace/mode/pig" && e.args) {
-      var _textBefore = editor.getTextBeforeCursor();
-      if ((e.args == "'" && _textBefore.toUpperCase().indexOf("LOAD ") > -1 && _textBefore.toUpperCase().indexOf("LOAD ") == _textBefore.toUpperCase().length - 5)
-          || _textBefore.toUpperCase().indexOf("LOAD '") > -1 && _textBefore.toUpperCase().indexOf("LOAD '") == _textBefore.toUpperCase().length - 6){
-        editor.disableAutocomplete();
-        var _btn = editor.showFileButton();
-        _btn.on("click", function(ie){
-          ie.preventDefault();
-          if ($(".filechooser-content").data("spinner") == null){
-            $(".filechooser-content").data("spinner", $(".filechooser-content").html());
-          }
-          else {
-            $(".filechooser-content").html($(".filechooser-content").data("spinner"));
-          }
-          $(".filechooser-content").jHueFileChooser({
-            onFileChoose: function (filePath) {
-              editor.session.insert(editor.getCursorPosition(), filePath + "'");
-              editor.hideFileButton();
-              editor.enableAutocomplete();
-              $(".filechooser").hide();
-            },
-            selectFolder: false,
-            createFolder: false
-          });
-          $(".filechooser").css({ "top": $(ie.currentTarget).position().top, "left": $(ie.currentTarget).position().left}).show();
-        });
-      }
-      else {
-        editor.hideFileButton();
-        editor.enableAutocomplete();
-      }
-      if (e.args != "'" && _textBefore.toUpperCase().indexOf("LOAD '") > -1 && _textBefore.toUpperCase().indexOf("LOAD '") == _textBefore.toUpperCase().length - 6) {
-        editor.hideFileButton();
-        editor.enableAutocomplete();
-      }
-    }
-
-  }
-
-
-  function onChangeHandler(event, editor, valueAccessor) {
-    valueAccessor().extraCompleters([]);
-    editor.session.getMode().$id = valueAccessor().mode();
-
-    var _before = editor.getTextBeforeCursor(";");
-    var _beforeU = _before.toUpperCase();
-    var _after = editor.getTextAfterCursor(";");
-    var _afterU = _after.toUpperCase();
-    if (editor.session.getMode().$id == "ace/mode/hivesql" || editor.session.getMode().$id == "ace/mode/impalasql") {
-      if ($.trim(_before).substr(-1) != ".") {
-        if ((_beforeU.indexOf(" FROM ") > -1 || _beforeU.indexOf(" TABLE ") > -1 || _beforeU.indexOf(" STATS ") > -1) && _beforeU.indexOf(" ON ") == -1 && _beforeU.indexOf(" ORDER BY ") == -1 && _beforeU.indexOf(" WHERE ") == -1 ||
-            _beforeU.indexOf("REFRESH") > -1 || _beforeU.indexOf("METADATA") > -1 || _beforeU.indexOf("DESCRIBE") > -1) {
-          editor.showSpinner();
-          valueAccessor().extraCompleters([]);
-          AceAutocomplete.getTables(DEFAULT_DB, function (data) {
-            var _tableNames = data.split(" ");
-            var _tables = [];
-            _tableNames.forEach(function (tbl) {
-              _tables.push({value: tbl, score: 1000, meta: "table"});
-            });
-            valueAccessor().extraCompleters([newCompleter(_tables)]);
-            editor.hideSpinner();
-          });
-        }
-        if (_beforeU.indexOf("SELECT ") > -1 && _beforeU.indexOf(" FROM ") == -1) { //  && !CodeMirror.fromDot
-          if (_afterU.indexOf("FROM ") > -1) {
-            fieldsAutocomplete(editor, valueAccessor);
-          }
-          else {
-            console.log("table magic")
-          }
-        }
-        else {
-          if ((_beforeU.indexOf("WHERE") > -1 || _beforeU.indexOf("ORDER BY") > -1) && _beforeU.match(/ ON| LIMIT| GROUP| SORT/) == null) {
-            fieldsAutocomplete(editor, valueAccessor);
-          }
-          else {
-            console.log("do other stuff")
-          }
-        }
-      }
-    }
-  }
 
 
   var assist = new Assist({
@@ -1074,6 +926,10 @@ var AceAutocomplete = new Autocomplete({
       activeCodemirrorEditor.setSelection(activeCodemirrorEditor.getCursor());
       activeCodemirrorEditor.focus();
     }
+  });
+
+  huePubSub.subscribe('assist.mainObjectChange', function (db) {
+    aceAutocomplete.setDatabase(db);
   });
 
   ko.bindingHandlers.verticalSlide = {
