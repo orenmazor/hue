@@ -131,6 +131,19 @@ background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAACCAYAAACZgb
 }\
 .ace-inline-button:hover {\
   opacity: 1;\
+}\
+.ace_tooltip {\
+  background: #F7F7F7 !important;\
+  border: none !important;\
+  color:#333;\
+  padding:3px!important;\
+}\
+.ace_tooltip hr {\
+  margin: 3px!important;\
+}\
+.ace_editor.ace_autocomplete .ace_marker-layer .ace_active-line, .ace_editor.ace_autocomplete .ace_marker-layer .ace_line-hover {\
+  background-color: #DBE8F1;\
+  z-index: 1;\
 }";
 
 var dom = require("../lib/dom");
