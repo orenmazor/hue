@@ -1388,12 +1388,12 @@ ko.bindingHandlers.aceEditor = {
   init: function (element, valueAccessor) {
     var _el = $(element);
     var _options = ko.unwrap(valueAccessor());
-    var _onBlur = _options.onBlur || function () {
-    };
-    var _onChange = _options.onChange || function () {
-    };
-    var _onAfterExec = _options.onAfterExec || function () {
-    };
+    var _onFocus = _options.onFocus || function () {};
+    var _onBlur = _options.onBlur || function () {};
+    var _onChange = _options.onChange || function () {};
+    var _onCopy = _options.onCopy || function () {};
+    var _onPaste = _options.onPaste || function () {};
+    var _onAfterExec = _options.onAfterExec || function () {};
     var _autocompleter = _options.autocompleter || null;
     _el.text(_options.value());
     var editor = ace.edit(_el.attr("id"));
@@ -1408,13 +1408,32 @@ ko.bindingHandlers.aceEditor = {
       showLineNumbers: false
     }
 
+    if (editor.getValue() == "" && _options.placeholder){
+      editor.setValue(_options.placeholder);
+    }
+
     var _extraOptions = $.totalStorage("hue.ace.options") || {};
     $.extend(_editorOptions, _options.editorOptions || _extraOptions);
 
     editor.setOptions(_editorOptions);
+    editor.on("focus", function () {
+      if (_options.placeholder && editor.getValue() == _options.placeholder){
+        editor.setValue("");
+      }
+      _onFocus(editor);
+    });
     editor.on("blur", function () {
       _options.value(editor.getValue());
+      if (editor.getValue() == "" && _options.placeholder){
+        editor.setValue(_options.placeholder);
+      }
       _onBlur(editor);
+    });
+    editor.on("copy", function () {
+      _onCopy(editor);
+    });
+    editor.on("paste", function () {
+      _onPaste(editor);
     });
 
     function newCompleter(items) {

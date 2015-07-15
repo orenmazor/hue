@@ -464,8 +464,7 @@ ${ commonheader(_('Query'), app_name, user, "68px") | n,unicode }
           <input type="text" data-bind="value: value" />
         </div>
       </div>
-##      <textarea data-bind="value: statement_raw, codemirror: { 'id': id(), 'viewportMargin': Infinity, 'lineNumbers': true, 'indentUnit': 0, 'matchBrackets': true, 'mode': editorMode(), 'enter': execute }"></textarea>
-        <div class="ace-editor" data-bind="attr: {id: id()}, aceEditor: {value: statement_raw, aceInstance: ace, mode: aceEditorMode, extraCompleters: completers, errors: errors, autocompleter: aceAutocomplete }"></div>
+      <div class="ace-editor" data-bind="attr: {id: id()}, aceEditor: {value: statement_raw, aceInstance: ace, mode: aceEditorMode, extraCompleters: completers, errors: errors, autocompleter: aceAutocomplete, placeholder: $root.snippetPlaceholders[type()] }"></div>
       </div>
   </div>
 
@@ -856,16 +855,12 @@ ${ koComponents.assistPanel() }
 
 <script type="text/javascript" charset="utf-8">
 
-
   var aceAutocomplete = new Autocomplete({
     autocompleteBaseURL: "${ autocomplete_base_url | n,unicode }",
     autocompleteApp: "beeswax",
     autocompleteUser: "${user}",
     autocompleteFailsQuietlyOn: [500] // error codes from beeswax/views.py - autocomplete
   });
-
-  var DEFAULT_DB = "default";
-
 
   var assist = new Assist({
     app: "beeswax",
