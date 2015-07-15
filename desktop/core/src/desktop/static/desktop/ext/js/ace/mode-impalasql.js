@@ -77,7 +77,10 @@ var SqlHighlightRules = function() {
         }, {
             token : "text",
             regex : "\\s+"
-        } ]
+        },
+          {
+            caseInsensitive: true
+          }]
     };
     this.normalizeRules();
 };
