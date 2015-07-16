@@ -113,8 +113,8 @@ ${ commonheader(_('Query'), app_name, user, "68px") | n,unicode }
 <![endif]-->
 <script src="${ static('desktop/ext/js/medium-editor.min.js') }" type="text/javascript" charset="utf-8"></script>
 
-<script src="${ static('desktop/ext/js/ace/ace.js') }"></script>
-<script src="${ static('desktop/ext/js/ace/ext-language_tools.js') }"></script>
+<script src="${ static('desktop/js/ace/ace.js') }"></script>
+<script src="${ static('desktop/js/ace/ext-language_tools.js') }"></script>
 <script src="${ static('desktop/js/ace.extended.js') }"></script>
 <script src="${ static('spark/js/ace.autocomplete.js') }" type="text/javascript" charset="utf-8"></script>
 

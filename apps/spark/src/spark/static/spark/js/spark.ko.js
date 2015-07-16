@@ -114,8 +114,8 @@ var TYPE_EDITOR_MAP = {
 }
 
 var TYPE_ACE_EDITOR_MAP = {
-  'hive': 'ace/mode/hivesql',
-  'impala': 'ace/mode/impalasql',
+  'hive': 'ace/mode/hive',
+  'impala': 'ace/mode/impala',
   'python': 'ace/mode/python',
   'scala': 'ace/mode/scala',
   'pig': 'ace/mode/pig'
