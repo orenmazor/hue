@@ -1500,7 +1500,7 @@ ko.bindingHandlers.aceEditor = {
       var _beforeU = _before.toUpperCase();
       var _after = editor.getTextAfterCursor(";");
       var _afterU = _after.toUpperCase();
-      if (editor.session.getMode().$id == "ace/mode/hivesql" || editor.session.getMode().$id == "ace/mode/impalasql") {
+      if (editor.session.getMode().$id == "ace/mode/hive" || editor.session.getMode().$id == "ace/mode/impala") {
         if ($.trim(_before).substr(-1) != ".") {
           if ((_beforeU.indexOf(" FROM ") > -1 || _beforeU.indexOf(" TABLE ") > -1 || _beforeU.indexOf(" STATS ") > -1) && _beforeU.indexOf(" ON ") == -1 && _beforeU.indexOf(" ORDER BY ") == -1 && _beforeU.indexOf(" WHERE ") == -1 ||
               _beforeU.indexOf("REFRESH") > -1 || _beforeU.indexOf("METADATA") > -1 || _beforeU.indexOf("DESCRIBE") > -1) {
@@ -1545,7 +1545,7 @@ ko.bindingHandlers.aceEditor = {
 
     editor.commands.on("afterExec", function (e) {
       editor.session.getMode().$id = valueAccessor().mode(); // forces the id again because of Ace command internals
-      if ((editor.session.getMode().$id == "ace/mode/hivesql" || editor.session.getMode().$id == "ace/mode/impalasql") && e.args == ".") {
+      if ((editor.session.getMode().$id == "ace/mode/hive" || editor.session.getMode().$id == "ace/mode/impala") && e.args == ".") {
         fieldsAutocomplete(editor, valueAccessor);
       }
       // if it's pig and before it's LOAD ' we disable the autocomplete and show a filechooser btn
