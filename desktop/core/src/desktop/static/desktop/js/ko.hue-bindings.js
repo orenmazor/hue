@@ -1526,16 +1526,10 @@ ko.bindingHandlers.aceEditor = {
             if (_afterU.indexOf("FROM ") > -1) {
               fieldsAutocomplete(editor, valueAccessor);
             }
-            else {
-              console.log("table magic")
-            }
           }
           else {
             if ((_beforeU.indexOf("WHERE") > -1 || _beforeU.indexOf("ORDER BY") > -1) && _beforeU.match(/ ON| LIMIT| GROUP| SORT/) == null) {
               fieldsAutocomplete(editor, valueAccessor);
-            }
-            else {
-              console.log("do other stuff")
             }
           }
         }

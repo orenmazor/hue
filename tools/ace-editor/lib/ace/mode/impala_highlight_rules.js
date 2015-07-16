@@ -45,7 +45,7 @@ define(function (require, exports, module) {
         "keyword": keywords,
         "constant.language": builtinConstants,
         "storage.type": dataTypes
-    }, "identifier", false);
+    }, "identifier", true);
 
     this.$rules = {
       start: [
@@ -67,8 +67,7 @@ define(function (require, exports, module) {
             regex : "[+-]?\\d+(?:(?:\\.\\d*)?(?:[eE][+-]?\\d+)?)?\\b"
         }, {
             token : keywordMapper,
-            regex : "[a-zA-Z_$][a-zA-Z0-9_$]*\\b",
-            caseInsensitive: true
+            regex : "[a-zA-Z_$][a-zA-Z0-9_$]*\\b"
         }, {
             token : "keyword.operator",
             regex : "\\+|\\-|\\/|\\/\\/|%|<@>|@>|<@|&|\\^|~|<|>|<=|=>|==|!=|<>|="
